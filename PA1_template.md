@@ -1,10 +1,6 @@
----
-output: 
-  html_document: 
-    keep_md: yes
----
 ## Loading and preprocessing the data
-``` {r echo=TRUE, warning=FALSE, message=FALSE, warning=FALSE, message=FALSE}
+
+```r
 library(knitr)
 library(ggplot2)
 library(plyr)
@@ -19,16 +15,20 @@ dailysteps <- rename(dailysteps,c("x"="aggregatesteps"))
 ```
 
 ## What is mean total number of steps taken per day?
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
+
+```r
 mediandailysteps <- median(dailysteps$aggregatesteps, na.rm=TRUE)
 meandailysteps <- mean(dailysteps$aggregatesteps, na.rm=TRUE)
 dailyhist <- qplot(dailysteps$aggregatesteps, geom="histogram") 
 print(dailyhist)
 ```
-The  median is `r mediandailysteps`. The mean is `r meandailysteps`.
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+The  median is 10765. The mean is 1.0766189\times 10^{4}.
 
 ## What is the average daily activity pattern?
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
+
+```r
 intervalsteps <- aggregate(activity$steps,list(activity$interval),mean,na.rm = TRUE)
 intervalsteps <- rename(intervalsteps,c("Group.1"="interval"))
 intervalsteps <- rename(intervalsteps,c("x"="meansteps"))
@@ -36,16 +36,23 @@ intervalstrings <- sprintf("%04d",intervalsteps$interval)
 intervalsteps <- cbind(intervalsteps, intervalstrings)
 intervalplot <- ggplot(intervalsteps,aes(intervalstrings,meansteps, group=1))+geom_line()+xlab("Interval")+ylab("Average Steps")
 print(intervalplot)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 maxinterval <- intervalsteps[which.max(intervalsteps$meansteps),1]
 ```
-The most active interval is `r maxinterval`.
+The most active interval is 835.
 
 ## Imputing missing values
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
+
+```r
 missvalues <- sum(is.na(activity$steps))
 ```
 There are 'r missvalues' missing values. These will be replaced by the mean steps.
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
+
+```r
 activityimp <- activity
 activityimp$steps <- with(activity, impute(steps, mean))
 dailystepsimp <- aggregate(activityimp$steps,list(activityimp$date),sum)
@@ -54,14 +61,18 @@ dailystepsimp <- rename(dailystepsimp,c("x"="aggregatesteps"))
 mediandailystepsimp <- median(dailystepsimp$aggregatesteps, na.rm=TRUE)
 meandailystepsimp <- mean(dailystepsimp$aggregatesteps, na.rm=TRUE)
 ```
-The new median is `r mediandailystepsimp`. The new mean is `r meandailystepsimp`.
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
+The new median is 1.0766189\times 10^{4}. The new mean is 1.0766189\times 10^{4}.
+
+```r
 dailyhistimp <- qplot(dailystepsimp$aggregatesteps, geom="histogram")
 print(dailyhistimp)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
 ## Are there differences in activity patterns between weekdays and weekends?
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
+
+```r
 activityimpday <- weekdays(as.Date(activityimp$date),FALSE)
 activityimp <- cbind(activityimp,activityimpday)
 weekdayactivity <- subset(activityimp, activityimpday != "Sunday" & activityimpday != "Saturday")
@@ -80,3 +91,5 @@ dayplot <- ggplot(wdsteps, aes(interval,aggregatesteps))+geom_line()+xlab("Inter
 endplot <- ggplot(westeps, aes(interval,aggregatesteps))+geom_line()+xlab("Interval")+ylab("Average Steps")
 grid.arrange(dayplot,endplot)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
